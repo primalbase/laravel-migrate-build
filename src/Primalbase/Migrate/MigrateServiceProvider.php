@@ -18,7 +18,7 @@ class MigrateServiceProvider extends ServiceProvider {
 	 */
 	public function boot()
 	{
-		$this->package('primalbase/migrate');
+		$this->package('primalbase/laravel-migrate-build');
 	}
 
 	/**

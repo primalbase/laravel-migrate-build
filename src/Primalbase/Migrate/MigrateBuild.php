@@ -57,7 +57,7 @@ class MigrateBuild extends Command {
 			return false;
 		}
 
-    $sheetName = Config::get('migrate::build.spread_sheet_name');
+    $sheetName = Config::get('laravel-migrate-build::build.spread_sheet_name');
 		$spreadsheetFeed = $spreadsheetService->getSpreadsheets();
 		$spreadsheet     = $spreadsheetFeed->getByTitle($sheetName);
 		$worksheetFeed   = $spreadsheet->getWorksheets();
@@ -76,7 +76,7 @@ class MigrateBuild extends Command {
       return false;
     }
 
-    $checks = Config::get('migrate::build.available_sheet_check');
+    $checks = Config::get('laravel-migrate-build::build.available_sheet_check');
 		$optimize = false;
 		foreach ($tables as $table) {
 			$worksheet = $worksheetFeed->getByTitle($table);
@@ -84,7 +84,7 @@ class MigrateBuild extends Command {
 				continue;
 			$definition = $this->readTableDefinition($worksheet);
 			$filePath = app_path(sprintf('database/migrations/%s_%s.php', date('Y_m_d_His'), $definition['keyName']));
-			$migration = View::make('migrate::migration', [
+			$migration = View::make('laravel-migrate-build::migration', [
 				'className'   => $definition['className'],
 				'tableName'   => $definition['tableName'],
 				'engine'      => $definition['engine'],
@@ -115,10 +115,10 @@ class MigrateBuild extends Command {
 	protected function connection()
 	{
 		/** @var Config $config */
-		$id = Config::get('migrate::client_id');
-		$email = Config::get('migrate::build.client_email');
-		$keyPath = Config::get('migrate::build.client_key_path');
-		$keyPassword = Config::get('migrate::build.client_key_password');
+		$id = Config::get('laravel-migrate-build::build.client_id');
+		$email = Config::get('laravel-migrate-build::build.client_email');
+		$keyPath = Config::get('laravel-migrate-build::build.client_key_path');
+		$keyPassword = Config::get('laravel-migrate-build::build.client_key_password');
 
 		$obj_client_auth = new Google_Client ();
 		$obj_client_auth->setApplicationName ('MigrateBuild');
