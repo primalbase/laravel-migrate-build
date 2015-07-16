@@ -1,0 +1,22 @@
+{
+    "name": "primalbase/laravel-migrate-build",
+    "description": "migrate:build from Google spreadsheet.",
+    "keywords": ["laravel"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Hiroshi Kawai",
+            "email": "kawai@primalbase.jp"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.0",
+        "illuminate/support": "4.2.*"
+    },
+    "autoload": {
+        "psr-0": {
+            "Primalbase\\Migrate": "src/"
+        }
+    },
+    "minimum-stability": "stable"
+}
