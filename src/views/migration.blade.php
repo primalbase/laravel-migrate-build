@@ -3,6 +3,7 @@
  * @var string $className
  * @var string $tableName
  * @var string $engine
+ * @var string $rowFormat
  * @var array $columns
  *   string label
  *   string name
@@ -31,50 +32,56 @@ class ${className} extends Migration {
 
 
 __PHP__;
-  if ($increments)
-    $code.= "      \$table->increments('id');".PHP_EOL;
+if ($increments)
+  $code.= "      \$table->increments('id');".PHP_EOL;
 
-  foreach ($columns as $column)
+foreach ($columns as $column)
+{
+  if ($column['type'] == 'stapler')
   {
-    if ($column['type'] == 'stapler')
-    {
-      $code.= sprintf("      \$table->string('%s_file_name')->nullable();", $column['name']).PHP_EOL;
-      $code.= sprintf("      \$table->integer('%s_file_size')->nullable();", $column['name']).PHP_EOL;
-      $code.= sprintf("      \$table->integer('%s_content_type')->nullable();", $column['name']).PHP_EOL;
-      $code.= sprintf("      \$table->integer('%s_updated_at')->nullable();", $column['name']).PHP_EOL;
-    }
+    $code.= sprintf("      \$table->string('%s_file_name')->nullable();", $column['name']).PHP_EOL;
+    $code.= sprintf("      \$table->integer('%s_file_size')->nullable();", $column['name']).PHP_EOL;
+    $code.= sprintf("      \$table->integer('%s_content_type')->nullable();", $column['name']).PHP_EOL;
+    $code.= sprintf("      \$table->integer('%s_updated_at')->nullable();", $column['name']).PHP_EOL;
+  }
+  else
+  {
+    $code.= sprintf("      \$table->%s('%s'", $column['type'], $column['name']);
+    if (isset($column['size']))
+      $code.= sprintf(", %s)", $column['size']);
     else
-    {
-      $code.= sprintf("      \$table->%s('%s'", $column['type'], $column['name']);
-      if (isset($column['size']))
-        $code.= sprintf(", %s)", $column['size']);
-      else
-        $code.= ")";
-      if (isset($column['default']))
-        $code.= sprintf("->default('%s')", $column['default']);
-      if ($column['index'])
-        $code.= "->index()";
-      if ($column['unique'])
-        $code.= "->unique()";
-      if ($column['nullable'])
-        $code.= "->nullable()";
-      $code.=';'.PHP_EOL;
-    }
+      $code.= ")";
+    if (isset($column['default']))
+      $code.= sprintf("->default('%s')", $column['default']);
+    if ($column['index'])
+      $code.= "->index()";
+    if ($column['unique'])
+      $code.= "->unique()";
+    if ($column['nullable'])
+      $code.= "->nullable()";
+    $code.=';'.PHP_EOL;
   }
-  if ($publishes)
-    $code.= "      \$table->datetime('published_at')->nullable();".PHP_EOL;
-  if ($publishes)
-    $code.= "      \$table->datetime('terminated_at')->nullable();".PHP_EOL;
-  if ($timestamps)
-    $code.= "      \$table->timestamps();".PHP_EOL;
-  if ($softDeletes)
-    $code.= "      \$table->softDeletes();".PHP_EOL;
-  if ($engine)
-    $code.= sprintf("      \$table->engine = '%s';", $engine).PHP_EOL;
+}
+if ($publishes)
+  $code.= "      \$table->datetime('published_at')->nullable();".PHP_EOL;
+if ($publishes)
+  $code.= "      \$table->datetime('terminated_at')->nullable();".PHP_EOL;
+if ($timestamps)
+  $code.= "      \$table->timestamps();".PHP_EOL;
+if ($softDeletes)
+  $code.= "      \$table->softDeletes();".PHP_EOL;
+if ($engine)
+  $code.= sprintf("      \$table->engine = '%s';", $engine).PHP_EOL;
 
+$code.= '    });'.PHP_EOL;
+
+if ($rowFormat)
+{
+  $sql = "ALTER TABLE `${tableName}` ROW_FORMAT=${rowFormat};";
+  $code.= sprintf("    DB::unprepared('%s');", $sql).PHP_EOL;
+}
+$code.= '  }'.PHP_EOL;
 $code.=<<<__PHP__
-    });
-  }
 
   public function down()
   {

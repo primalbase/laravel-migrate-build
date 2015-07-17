@@ -88,6 +88,7 @@ class MigrateBuild extends Command {
 				'className'   => $definition['className'],
 				'tableName'   => $definition['tableName'],
 				'engine'      => $definition['engine'],
+				'rowFormat'   => $definition['rowFormat'],
 				'increments'  => $definition['increments'],
 				'timestamps'  => $definition['timestamps'],
 				'publishes'   => $definition['publishes'],
@@ -150,6 +151,7 @@ class MigrateBuild extends Command {
 		$definition['publishes'] = $this->getCellFlag($cellFeed, 4, 15);
 		$definition['softDeletes'] = $this->getCellFlag($cellFeed, 4, 20);
 		$definition['engine'] = $this->getCellString($cellFeed, 4, 29);
+		$definition['rowFormat'] = $this->getCellString($cellFeed, 4, 43);
 		$columns = [];
 		foreach (range(7, $worksheet->getRowCount()) as $row)
 		{
