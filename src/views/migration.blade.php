@@ -52,7 +52,12 @@ foreach ($columns as $column)
     else
       $code.= ")";
     if (isset($column['default']))
-      $code.= sprintf("->default('%s')", $column['default']);
+    {
+      if (in_array($column['type'], ['integer', 'bigInteger', 'mediumInteger', 'tinyInteger', 'smallInteger', 'unsignedInteger', 'unsignedBigInteger', 'float', 'double', 'decimal', 'boolean']))
+        $code.= sprintf("->default(%s)", $column['default']);
+      else
+        $code.= sprintf("->default('%s')", $column['default']);
+    }
     if ($column['index'])
       $code.= "->index()";
     if ($column['unique'])
