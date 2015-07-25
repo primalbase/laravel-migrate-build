@@ -77,7 +77,7 @@ class MigrateBuild extends Command {
     }
 
     $checks = Config::get('laravel-migrate-build::build.available_sheet_check');
-		$optimize = false;
+//		$optimize = false;
 		foreach ($tables as $table) {
 			$worksheet = $worksheetFeed->getByTitle($table);
 			if ($this->getCellString($worksheet->getCellFeed(), $checks['row'], $checks['col']) != $checks['value'])
@@ -106,11 +106,11 @@ class MigrateBuild extends Command {
 				$filePath = $files[0];
 			}
 			file_put_contents($filePath, $migration);
-			$optimize = true;
+//			$optimize = true;
 		}
 
-		if ($optimize)
-			$this->call('optimize');
+//		if ($optimize)
+//			$this->call('optimize');
 	}
 
 	protected function connection()

@@ -41,8 +41,8 @@ foreach ($columns as $column)
   {
     $code.= sprintf("      \$table->string('%s_file_name')->nullable();", $column['name']).PHP_EOL;
     $code.= sprintf("      \$table->integer('%s_file_size')->nullable();", $column['name']).PHP_EOL;
-    $code.= sprintf("      \$table->integer('%s_content_type')->nullable();", $column['name']).PHP_EOL;
-    $code.= sprintf("      \$table->integer('%s_updated_at')->nullable();", $column['name']).PHP_EOL;
+    $code.= sprintf("      \$table->string('%s_content_type')->nullable();", $column['name']).PHP_EOL;
+    $code.= sprintf("      \$table->timestamp('%s_updated_at')->nullable();", $column['name']).PHP_EOL;
   }
   else
   {
