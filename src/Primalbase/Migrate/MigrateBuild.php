@@ -2,6 +2,7 @@
 namespace Primalbase\Migrate;
 
 use Google\Spreadsheet\CellFeed;
+use Google\Spreadsheet\WorksheetFeed;
 use Illuminate\Console\Command;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
@@ -48,6 +49,7 @@ class MigrateBuild extends Command {
 	public function fire()
 	{
     $tables = $this->argument('table');
+		$isAll  = $this->option('all');
 
 		try {
 			$spreadsheetService = $this->connection();
@@ -60,29 +62,51 @@ class MigrateBuild extends Command {
     $sheetName = Config::get('laravel-migrate-build::build.spread_sheet_name');
 		$spreadsheetFeed = $spreadsheetService->getSpreadsheets();
 		$spreadsheet     = $spreadsheetFeed->getByTitle($sheetName);
+		if (!$spreadsheet) {
+			$this->error($sheetName.' is not exists.');
+			return false;
+		}
 		$worksheetFeed   = $spreadsheet->getWorksheets();
 
-    if (empty($tables))
+		if ($isAll)
+		{
+			$definitions = $this->getAvailableTableDefinitions($worksheetFeed);
+			$this->info(implode(PHP_EOL, array_pluck($definitions, 'tableName')));
+
+			if (!$this->confirm('Built all tables?'))
+				return false;
+		}
+		elseif (!empty($tables))
     {
+			$definitions = [];
+			foreach ($tables as $table)
+			{
+				$worksheet  = $worksheetFeed->getByTitle($table);
+				if (is_null($worksheet))
+				{
+					$this->error($table.' table not exists.');
+					return false;
+				}
+				$definition = $this->readTableDefinition($worksheet);
+				if (!$definition)
+					continue;
+
+				$definitions[] = $definition;
+			}
+    }
+		else
+		{
 			$this->error($this->getSynopsis());
 			echo PHP_EOL;
 			$this->comment('Listing tables.');
-      foreach ($worksheetFeed as $sheet)
-      {
-        $this->info($sheet->getTitle());
-      }
+			$definitions = $this->getAvailableTableDefinitions($worksheetFeed);
+			$this->info(implode(PHP_EOL, array_pluck($definitions, 'tableName')));
+			$this->error('Select any table.  -- But not implemented yet.');
+			return false;
+		}
 
-      $this->error('Select any table.  -- But not implemented yet.');
-      return false;
-    }
+		foreach ($definitions as $definition) {
 
-    $checks = Config::get('laravel-migrate-build::build.available_sheet_check');
-//		$optimize = false;
-		foreach ($tables as $table) {
-			$worksheet = $worksheetFeed->getByTitle($table);
-			if ($this->getCellString($worksheet->getCellFeed(), $checks['row'], $checks['col']) != $checks['value'])
-				continue;
-			$definition = $this->readTableDefinition($worksheet);
 			$filePath = app_path(sprintf('database/migrations/%s_%s.php', date('Y_m_d_His'), $definition['keyName']));
 			$migration = View::make('laravel-migrate-build::migration', [
 				'className'   => $definition['className'],
@@ -106,15 +130,31 @@ class MigrateBuild extends Command {
 				$filePath = $files[0];
 			}
 			file_put_contents($filePath, $migration);
-//			$optimize = true;
 		}
 
-//		if ($optimize)
-//			$this->call('optimize');
+		return true;
+  }
+
+	protected function getAvailableTableDefinitions(WorksheetFeed $worksheetFeed)
+	{
+		$checks = Config::get('laravel-migrate-build::build.available_sheet_check');
+
+		$tables = [];
+		foreach ($worksheetFeed as $sheet)
+		{
+			if ($this->getCellString($sheet->getCellFeed(), $checks['row'], $checks['col']) != $checks['value'])
+			{
+				continue;
+			}
+			$tables[] = $this->readTableDefinition($sheet);
+		}
+
+		return $tables;
 	}
 
-	protected function connection()
-	{
+
+  protected function connection()
+  {
 		/** @var Config $config */
 		$id = Config::get('laravel-migrate-build::build.client_id');
 		$email = Config::get('laravel-migrate-build::build.client_email');
@@ -143,8 +183,14 @@ class MigrateBuild extends Command {
 
 	protected function readTableDefinition(Worksheet $worksheet)
 	{
-		$definition = [];
+		$checks = Config::get('laravel-migrate-build::build.available_sheet_check');
+
 		$cellFeed = $worksheet->getCellFeed();
+
+		if ($this->getCellString($cellFeed, $checks['row'], $checks['col']) != $checks['value'])
+			return false;
+
+		$definition = [];
 		$definition['tableName'] = $this->getCellString($cellFeed, 2, 15);
 		$definition['increments'] = $this->getCellFlag($cellFeed, 4, 5);
 		$definition['timestamps'] = $this->getCellFlag($cellFeed, 4, 10);
@@ -240,7 +286,7 @@ class MigrateBuild extends Command {
 	protected function getOptions()
 	{
 		return array(
-			//			array('table', null, InputOption::VALUE_OPTIONAL, 'table name.', null),
+			array('all', null, InputOption::VALUE_NONE, 'Build all tables.', null),
 		);
 	}
 
