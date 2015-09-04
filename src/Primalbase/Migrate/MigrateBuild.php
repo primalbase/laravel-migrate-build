@@ -105,6 +105,7 @@ class MigrateBuild extends Command {
 			return false;
 		}
 
+    $makes = 0;
 		foreach ($definitions as $definition) {
 
 			$filePath = app_path(sprintf('database/migrations/%s_%s.php', date('Y_m_d_His'), $definition['keyName']));
@@ -129,7 +130,16 @@ class MigrateBuild extends Command {
 
 				$filePath = $files[0];
 			}
+      else
+      {
+        $makes++;
+      }
 			file_put_contents($filePath, $migration);
+
+      if ($makes > 0)
+      {
+        $this->call('optimize');
+      }
 		}
 
 		return true;
