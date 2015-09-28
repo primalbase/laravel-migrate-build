@@ -135,11 +135,11 @@ class MigrateBuild extends Command {
         $makes++;
       }
 			file_put_contents($filePath, $migration);
+		}
 
-      if ($makes > 0)
-      {
-        $this->call('optimize');
-      }
+		if ($makes > 0)
+		{
+			$this->call('optimize');
 		}
 
 		return true;
