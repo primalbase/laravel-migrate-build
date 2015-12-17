@@ -13,13 +13,12 @@
         "php": ">=5.4.0",
         "illuminate/support": "4.2.*",
         "asimlqt/php-google-spreadsheet-client": "2.3.*",
-        "google/apiclient": "^2.0.0@RC"
+        "google/apiclient": "1.1.*"
     },
     "autoload": {
         "psr-0": {
             "Primalbase\\Migrate": "src/"
         }
     },
-    "minimum-stability": "dev",
-    "prefer-stable" : true
+    "minimum-stability": "stable"
 }

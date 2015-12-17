@@ -11,6 +11,8 @@
 composer require primalbase/laravel-migrate-build
 </pre>
 
+### required 
+
 ### app.php
 <pre>
   'providers' => array(

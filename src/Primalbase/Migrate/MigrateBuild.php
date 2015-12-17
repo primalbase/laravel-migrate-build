@@ -3,6 +3,7 @@ namespace Primalbase\Migrate;
 
 use Google\Spreadsheet\CellFeed;
 use Google\Spreadsheet\WorksheetFeed;
+use Google_Auth_AssertionCredentials;
 use Illuminate\Console\Command;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
@@ -172,10 +173,21 @@ class MigrateBuild extends Command {
 			'https://spreadsheets.google.com/feeds',
 			'https://docs.google.com/feeds',
 		]);
-		putenv('GOOGLE_APPLICATION_CREDENTIALS='.$keyPath);
-		$client->useApplicationDefaultCredentials();
-		$client->refreshTokenWithAssertion();
-		$serviceRequest = new DefaultServiceRequest(array_get($client->getAccessToken(), 'access_token'));
+    $auth = json_decode(file_get_contents($keyPath));
+    $credentials = new Google_Auth_AssertionCredentials(
+      $auth->client_email,
+      [
+        'https://spreadsheets.google.com/feeds',
+        'https://docs.google.com/feeds',
+      ],
+      $auth->private_key
+    );
+    $client->setAssertionCredentials($credentials);
+    $client->getAuth()->refreshTokenWithAssertion();
+    $token = json_decode($client->getAccessToken());
+    $accessToken = $token->access_token;
+    $serviceRequest = new DefaultServiceRequest($accessToken);
+
 		ServiceRequestFactory::setInstance($serviceRequest);
 
 		return new SpreadsheetService();
