@@ -1,21 +1,8 @@
 # laravel-migrate-build
 
-### composer.json
+### composer
 <pre>
-  "repositories": [
-    {
-      "type": "vcs",
-      "url": "https://github.com/primalbase/laravel-migrate-build"
-    }
-  ],
-  "require": {
-    "primalbase/laravel-migrate-build": "dev-master"
-  }
-</pre>
-
-### composer update
-<pre>
-$ composer update
+composer require primalbase/laravel-migrate-build
 </pre>
 
 ### app.php
