@@ -10,7 +10,6 @@ use Google\Spreadsheet\DefaultServiceRequest;
 use Google\Spreadsheet\ServiceRequestFactory;
 use Google\Spreadsheet\SpreadsheetService;
 use Google_Client;
-use Google_Auth_AssertionCredentials;
 use Google\Spreadsheet\Worksheet;
 use View;
 use Config;
@@ -165,27 +164,18 @@ class MigrateBuild extends Command {
 
   protected function connection()
   {
-		/** @var Config $config */
-		$id = Config::get('laravel-migrate-build::build.client_id');
-		$email = Config::get('laravel-migrate-build::build.client_email');
 		$keyPath = Config::get('laravel-migrate-build::build.client_key_path');
-		$keyPassword = Config::get('laravel-migrate-build::build.client_key_password');
 
-		$obj_client_auth = new Google_Client ();
-		$obj_client_auth->setApplicationName ('MigrateBuild');
-		$obj_client_auth->setClientId ($id);
-		$obj_client_auth->setAssertionCredentials (new Google_Auth_AssertionCredentials(
-			$email,
-			array('https://spreadsheets.google.com/feeds','https://docs.google.com/feeds'),
-			@file_get_contents($keyPath),
-			$keyPassword
-		));
-
-		$obj_client_auth->getAuth()->refreshTokenWithAssertion();
-		$obj_token  = json_decode($obj_client_auth->getAccessToken());
-		$accessToken = $obj_token->access_token;
-
-		$serviceRequest = new DefaultServiceRequest($accessToken);
+		$client = new Google_Client();
+		$client->setApplicationName('MigrateBuild');
+		$client->setScopes([
+			'https://spreadsheets.google.com/feeds',
+			'https://docs.google.com/feeds',
+		]);
+		putenv('GOOGLE_APPLICATION_CREDENTIALS='.$keyPath);
+		$client->useApplicationDefaultCredentials();
+		$client->refreshTokenWithAssertion();
+		$serviceRequest = new DefaultServiceRequest(array_get($client->getAccessToken(), 'access_token'));
 		ServiceRequestFactory::setInstance($serviceRequest);
 
 		return new SpreadsheetService();
