@@ -20,5 +20,5 @@
             "Primalbase\\Migrate": "src/"
         }
     },
-    "minimum-stability": "stable"
+    "minimum-stability": "RC"
 }
