@@ -11,8 +11,6 @@
 composer require primalbase/laravel-migrate-build
 </pre>
 
-### required 
-
 ### app.php
 <pre>
   'providers' => array(
@@ -41,3 +39,12 @@ $ php artisan config:publish primalbase/laravel-migrate-build
     ],
 </pre>
 
+### How to use
+
+<pre>
+php artisan migrate:build # show all available tables
+php artisan migrate:build --all # build all migration files
+php artisan migrate:build users roles # build migration files
+</pre>
+
+generated todatabase/migrations
