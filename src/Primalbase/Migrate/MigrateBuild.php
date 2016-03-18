@@ -213,6 +213,8 @@ class MigrateBuild extends Command {
 		{
 			$no = $this->getCellNumber($cellFeed, $row, 1);
 			if ($no == 0) break;
+			$ignore = $this->getCellFlag($cellFeed, $row, 37);
+			if ($ignore) continue;
 			$columns[] = [
 				'label'    => $this->getCellString($cellFeed, $row, 3),
 				'name'     => $this->getCellString($cellFeed, $row, 12),
